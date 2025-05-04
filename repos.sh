@@ -4,4 +4,5 @@
 
 mkdir -p ~/source
 cd ~/source
-git clone
+git clone git@github.com:mdelgert/UbuntuSetup.git
+git clone git@github.com:mdelgert/ReferenceNotes.git
