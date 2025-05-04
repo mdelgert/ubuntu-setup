@@ -9,5 +9,3 @@ sudo apt install -y \
     git \
     openssh-server \
     gparted \
-    kdiskmark \
-    remmina \

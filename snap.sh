@@ -8,3 +8,5 @@ sudo snap refresh
 sudo snap install \
     code \
     bing-wall \
+    kdiskmark \
+    remmina \
