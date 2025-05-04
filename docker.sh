@@ -1,12 +1,6 @@
 #!/bin/bash
 
-# This script will install Docker on your system. And grant the current user access to the Docker socket.
-
-# Check if the user is root
-if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root"
-    exit
-fi
+# This script will install Docker on Ubuntu 24.04.2 LTS. And grant the current user access to the Docker socket.
 
 # Check if the system is Ubuntu
 if [ -f /etc/lsb-release ]; then
@@ -19,36 +13,50 @@ fi
 # Check if Docker is already installed
 if command -v docker &> /dev/null; then
     echo "Docker is already installed"
-    exit
+else
+    # Install Docker
+    echo "Installing Docker..."
+    sudo apt-get update
+    sudo apt-get install -y docker.io
+
+    # Add the current user to the Docker group
+    echo "Adding user to Docker group..."
+    sudo usermod -aG docker $USER
+
+    # Enable and start the Docker service
+    echo "Enabling and starting Docker service..."
+    sudo systemctl enable docker
+    sudo systemctl start docker
+
+    # Check if Docker is running
+    if systemctl is-active --quiet docker; then
+        echo "Docker is running"
+    else
+        echo "Docker is not running"
+        exit
+    fi
+
+    # Check if Docker is installed
+    if command -v docker &> /dev/null; then
+        echo "Docker is installed"
+    else
+        echo "Docker is not installed"
+        exit
+    fi
 fi
 
-# Install Docker
-echo "Installing Docker..."
-apt-get update
-apt-get install -y docker.io
+# Update Docker Compose installation to use docker-compose-v2
+DOCKER_COMPOSE_PACKAGE="docker-compose-v2"
+echo "Installing Docker Compose v2..."
+sudo apt-get update
+sudo apt-get install -y $DOCKER_COMPOSE_PACKAGE
 
-# Add the current user to the Docker group
-echo "Adding user to Docker group..."
-usermod -aG docker $USER
-
-# Enable and start the Docker service
-echo "Enabling and starting Docker service..."
-systemctl enable docker
-systemctl start docker
-
-# Check if Docker is running
-if systemctl is-active --quiet docker; then
-    echo "Docker is running"
+# Verify Docker Compose v2 installation
+echo "Verifying Docker Compose v2 installation..."
+if docker compose version &> /dev/null; then
+    echo "Docker Compose v2 is installed"
 else
-    echo "Docker is not running"
-    exit
-fi
-
-# Check if Docker is installed
-if command -v docker &> /dev/null; then
-    echo "Docker is installed"
-else
-    echo "Docker is not installed"
+    echo "Docker Compose v2 installation failed"
     exit
 fi
 

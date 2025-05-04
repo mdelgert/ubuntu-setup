@@ -6,4 +6,4 @@ bash ./keys.sh
 bash ./apt.sh
 bash ./git.sh
 bash ./snap.sh
-bash sudo ./docker.sh
+bash ./docker.sh
