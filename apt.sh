@@ -5,6 +5,7 @@ sudo apt update && sudo apt upgrade -y
 
 # Install necessary packages
 sudo apt install -y \
+    curl \
     git \
     gparted \
     openssh-server \

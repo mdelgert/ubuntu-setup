@@ -1,77 +1,37 @@
 #!/bin/bash
 
-# This script will install Docker on Ubuntu 24.04.2 LTS. And grant the current user access to the Docker socket.
+# Script to install Docker using the convenience script, check for curl, and grant user permissions
 
-# Check if the system is Ubuntu
-if [ -f /etc/lsb-release ]; then
-    echo "Ubuntu detected"
-else
-    echo "This script is only for Ubuntu"
-    exit
-fi
-
-# Check if Docker is already installed
-if command -v docker &> /dev/null; then
-    echo "Docker is already installed"
-else
-    # Install Docker
-    echo "Installing Docker..."
+echo "Checking for curl..."
+if ! command -v curl &> /dev/null; then
+    echo "curl is not installed. Installing curl..."
     sudo apt-get update
-    sudo apt-get install -y docker.io
-
-    # Add the current user to the Docker group
-    echo "Adding user to Docker group..."
-    sudo usermod -aG docker $USER
-
-    # Enable and start the Docker service
-    echo "Enabling and starting Docker service..."
-    sudo systemctl enable docker
-    sudo systemctl start docker
-
-    # Check if Docker is running
-    if systemctl is-active --quiet docker; then
-        echo "Docker is running"
-    else
-        echo "Docker is not running"
-        exit
+    sudo apt-get install -y curl
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to install curl. Please check your network or package manager."
+        exit 1
     fi
-
-    # Check if Docker is installed
-    if command -v docker &> /dev/null; then
-        echo "Docker is installed"
-    else
-        echo "Docker is not installed"
-        exit
-    fi
-fi
-
-# Update Docker Compose installation to use docker-compose-v2
-DOCKER_COMPOSE_PACKAGE="docker-compose-v2"
-echo "Installing Docker Compose v2..."
-sudo apt-get update
-sudo apt-get install -y $DOCKER_COMPOSE_PACKAGE
-
-# Verify Docker Compose v2 installation
-echo "Verifying Docker Compose v2 installation..."
-if docker compose version &> /dev/null; then
-    echo "Docker Compose v2 is installed"
 else
-    echo "Docker Compose v2 installation failed"
-    exit
+    echo "curl is already installed."
 fi
 
-# Check if the current user has access to the Docker socket
-if docker ps &> /dev/null; then
-    echo "User has access to Docker socket"
-else
-    echo "User does not have access to Docker socket"
-    exit
+echo "Running Docker convenience script..."
+curl -fsSL https://get.docker.com | sh
+
+if [ $? -ne 0 ]; then
+    echo "Error: Convenience script failed. Check network or script output."
+    exit 1
 fi
 
-# Check if the current user is in the Docker group
-if groups $USER | grep -q docker; then
-    echo "User is in the Docker group"
-else
-    echo "User is not in the Docker group"
-    exit
-fi
+echo "Adding current user to docker group..."
+sudo usermod -aG docker $USER
+
+echo "Verifying Docker installation..."
+docker --version
+
+echo "Verifying Docker Compose installation..."
+docker compose version
+
+echo "Docker and Docker Compose installed successfully."
+echo "Log out and back in to use Docker without sudo or reboot."
+echo "Test Docker with: docker run hello-world"
