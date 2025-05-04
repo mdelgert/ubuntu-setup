@@ -3,7 +3,7 @@
 # This script will copy keys to the .ssh directory and set the correct permissions
 
 # Define the source directory for keys
-KEYS_SOURCE_DIR="../ssh"
+KEYS_SOURCE_DIR="/media/mdelgert/Ventoy/ssh"
 
 # Check if the .ssh directory exists
 if [ ! -d "$HOME/.ssh" ]; then
