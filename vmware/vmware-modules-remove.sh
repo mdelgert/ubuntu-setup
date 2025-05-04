@@ -1,8 +1,8 @@
 #!/bin/bash
 
-sudo mokutil --list-enrolled | grep "VMware Module Signing"
-
 sudo rm -rf ~/vmware-keys
+
+sudo mokutil --list-enrolled | grep "VMware Module Signing"
 
 sudo mokutil --list-enrolled | grep -A5 "VMware Module Signing"
 
