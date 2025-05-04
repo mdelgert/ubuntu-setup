@@ -14,4 +14,4 @@ openssl req -new -x509 -newkey rsa:2048 -keyout MOK.priv -outform DER -out MOK.d
 sudo mokutil --import MOK.der
 
 # Reboot to enroll the key
-#sudo reboot
+sudo reboot
