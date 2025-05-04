@@ -7,5 +7,7 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install -y \
     curl \
     git \
-    gparted \
     openssh-server \
+    gparted \
+    kdiskmark \
+    remmina \
