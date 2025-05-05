@@ -20,4 +20,4 @@ lsmod | grep vmmon
 lsmod | grep vmnet
 
 # Requires reboot for network to work
-sudo reboot
+#sudo reboot
