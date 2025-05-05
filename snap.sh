@@ -8,4 +8,3 @@
 sudo snap install \
     bing-wall \
     kdiskmark \
-    remmina \

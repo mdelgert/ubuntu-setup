@@ -7,7 +7,7 @@ VEEAM_INSTALLER="veeam-release-deb_1.0.9_amd64.deb"
 
 sudo dpkg -i $VEEAM_INSTALLER
 sudo apt-get update
-sudo apt-get install xorriso cifs-utils blksnap veeam
+sudo apt-get install -y xorriso cifs-utils blksnap veeam
 
 # Reboot the system and enroll Veeam mok key
 # sudo reboot
