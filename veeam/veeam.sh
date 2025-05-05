@@ -13,3 +13,11 @@ sudo apt-get install xorriso cifs-utils blksnap veeam
 # sudo reboot
 
 # After reboot run veam sudo veeam
+
+# Remove veeam reset mok key - https://helpcenter.veeam.com/docs/agentforlinux/userguide/installation_uefi_secure_boot.html?ver=60
+# sudo apt-get remove --purge veeam blksnap
+# sudo apt-get autoremove --purge
+# mok-reset.sh
+# veeam.sh
+# sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
+# sudo reboot
