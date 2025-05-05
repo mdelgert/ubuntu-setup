@@ -18,3 +18,6 @@ sudo modprobe vmnet
 # Check if modules are loaded
 lsmod | grep vmmon
 lsmod | grep vmnet
+
+# Requires reboot for network to work
+sudo reboot
