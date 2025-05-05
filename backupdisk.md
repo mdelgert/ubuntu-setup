@@ -43,12 +43,17 @@ This guide explains how to add a secondary disk to your Ubuntu system, including
    df -h
    ```
 
+3. Unmount the disk:
+   ```bash
+   sudo umount /mnt/d1
+   ```
+
 ### 6. Make the Mount Permanent
 1. Find the UUID of the partition:
    ```bash
    sudo blkid
    ```
-   Note the `UUID` of the partition (e.g., `/dev/sdb1`).
+   Note the `UUID` of the partition (e.g., `/dev/nvme0n1`).
 
 2. Edit the `/etc/fstab` file to ensure the disk mounts automatically on boot:
    ```bash
@@ -56,11 +61,15 @@ This guide explains how to add a secondary disk to your Ubuntu system, including
    ```
 3. Add the following line to the file:
    ```
-   UUID=<your-partition-uuid>  /mnt/backupdisk  ext4  defaults  0  2
+   # Backup drive
+   /dev/disk/by-uuid/<your-partition-uuid> /mnt/d1 ext4 defaults,nofail 0 2
    ```
    Replace `<your-partition-uuid>` with the actual UUID from the `blkid` command.
-
-4. Save and exit the editor.
+   
+4. Save and exit the editor then reload.
+   ```bash
+   systemctl daemon-reload
+   ```
 
 5. Test the configuration:
    ```bash
