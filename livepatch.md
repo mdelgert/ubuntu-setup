@@ -1,5 +1,7 @@
 ### Unsupported Kernel and Livepatch Compatibility
 
+https://ubuntu.com/security/livepatch/docs/livepatch/reference/kernels
+
 Ubuntu 24.04.2 LTS includes the HWE stack with the unsupported 6.11 kernel, which is incompatible with Canonical Livepatch. To ensure compatibility:
 
 - **Recommended**: Use the Ubuntu 24.04.1 ISO, which includes the supported 6.8 kernel.
