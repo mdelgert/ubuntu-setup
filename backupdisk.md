@@ -10,12 +10,12 @@ This guide explains how to add a secondary disk to your Ubuntu system, including
    sudo fdisk -l
    ```
    
-2. Identify the new disk (e.g., `/dev/sdb`).
+2. Identify the new disk (e.g., `/dev/nvme0n1`).
 
 ### 2. Partition the Disk
 1. Use the `fdisk` utility to create a new partition:
    ```bash
-   sudo fdisk /dev/sdb
+   sudo fdisk /dev/nvme0n1
    ```
 2. Follow the prompts to:
    - Create a new partition (`n` command).
@@ -24,19 +24,19 @@ This guide explains how to add a secondary disk to your Ubuntu system, including
 ### 3. Format the Partition
 1. Format the new partition with a filesystem (e.g., ext4):
    ```bash
-   sudo mkfs.ext4 /dev/sdb1
+   sudo mkfs.ext4 /dev/nvme0n1
    ```
 
 ### 4. Create a Mount Point
 1. Create a directory to mount the disk:
    ```bash
-   sudo mkdir /mnt/backupdisk
+   sudo mkdir /mnt/d1
    ```
 
 ### 5. Mount the Disk
 1. Mount the disk to the created directory:
    ```bash
-   sudo mount /dev/sdb1 /mnt/backupdisk
+   sudo mount /dev/nvme0n1 /mnt/d1
    ```
 2. Verify the disk is mounted:
    ```bash
@@ -44,16 +44,25 @@ This guide explains how to add a secondary disk to your Ubuntu system, including
    ```
 
 ### 6. Make the Mount Permanent
-1. Edit the `/etc/fstab` file to ensure the disk mounts automatically on boot:
+1. Find the UUID of the partition:
+   ```bash
+   sudo blkid
+   ```
+   Note the `UUID` of the partition (e.g., `/dev/sdb1`).
+
+2. Edit the `/etc/fstab` file to ensure the disk mounts automatically on boot:
    ```bash
    sudo nano /etc/fstab
    ```
-2. Add the following line to the file:
+3. Add the following line to the file:
    ```
-   /dev/sdb1  /mnt/backupdisk  ext4  defaults  0  2
+   UUID=<your-partition-uuid>  /mnt/backupdisk  ext4  defaults  0  2
    ```
-3. Save and exit the editor.
-4. Test the configuration:
+   Replace `<your-partition-uuid>` with the actual UUID from the `blkid` command.
+
+4. Save and exit the editor.
+
+5. Test the configuration:
    ```bash
    sudo mount -a
    ```
@@ -61,7 +70,7 @@ This guide explains how to add a secondary disk to your Ubuntu system, including
 ### 7. Set Permissions (Optional)
 1. Adjust permissions for the mount point as needed:
    ```bash
-   sudo chown -R $USER:$USER /mnt/backupdisk
+   sudo chown -R $USER:$USER /mnt/d1
    ```
 
 Your secondary disk is now ready to use.
