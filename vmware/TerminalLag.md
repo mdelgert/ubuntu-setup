@@ -1,59 +1,149 @@
-# Terminal Lag in Ubuntu VM on VMware Workstation: Causes & Solutions
 
-## Background – Identifying the Issue
+---
 
-Many users have reported **typing lag and slow refresh in Linux VM terminals** when using VMware Workstation 16.2+ and 17.x with 3D acceleration enabled. The symptom is that terminal output (and even menu UI) feels sluggish – characters appear only after a delay or on the next keypress, and parts of the screen (often the bottom half) don’t update immediately. In severe cases, typing or exiting programs like Vim or Tmux can lag by \~1 second or more. Notably, this issue has been observed regardless of host GPU/CPU vendor (Intel or AMD), and across various Linux guest distros (Ubuntu, Arch, openSUSE, etc.). This suggests the problem is not a specific hardware driver bug, but rather a **compatibility issue in VMware’s virtualization stack**.
+# 🐢 Fixing Terminal Lag in Ubuntu VM (VMware Workstation 17.x) with 3D Acceleration
 
-Several clues point to the root cause:
+## 🎯 The Issue
 
-* **VMware 3D Acceleration**: The lag correlates strongly with VMware’s **“Accelerate 3D Graphics”** feature. Many users found the problem disappears when 3D acceleration is turned off. This implies a bug in VMware’s virtual GPU rendering or display pipeline introduced around Workstation 16.2 (and still present in 17.x). Essentially, with 3D enabled, the VM’s screen updates aren’t being flushed properly unless forced by new input or motion. In fact, some discovered that as long as something is continuously animating (e.g. running `glxgears` in the guest), the lag vanishes – and returns once the system goes idle. This points to a timing/refresh issue in the virtual SVGA driver or hypervisor graphics rendering.
+You're running **Ubuntu 24.04.2 LTS** as your **host**, with **VMware Workstation 17.6.3**. When you create an Ubuntu VM and enable **3D acceleration**, you notice **lag in the terminal** — keys appear slowly, commands lag, or refresh is delayed.
 
-* **Input Handling (Keyboard)**: VMware forums eventually traced the issue to how **keyboard input** is handled in the VM when 3D acceleration is on. By default, VMware presents the guest with a virtual PS/2 keyboard. A known workaround (from VMware support) is to switch the VM to use a **virtual USB keyboard**, which dramatically improves responsiveness. This suggests the lag might be due to an interrupt or event-handling quirk with the virtual PS/2 device under 3D accelerated contexts. (In one report, enabling a USB keyboard input eliminated the delay without needing to disable graphics acceleration.)
+This issue affects both **Intel** and **AMD** systems and is confirmed by many other users across forums.
 
-* **Guest Desktop/Server Environment**: Interestingly, the lag is not confined to any one desktop environment or display server. It’s been observed in **GNOME (with Wayland or X11), MATE, KDE, and even in pure TTY consoles** inside the VM. This indicates the problem lies below the level of the GUI toolkit – likely in the VM’s display driver or VMware Tools. (For example, one user saw lag even at the Ubuntu login screen and in a text console, but **no lag when SSH’ing** into the same VM.) So while the *desktop environment* itself isn’t the direct culprit, certain compositors can exacerbate similar symptoms. (There was an unrelated bug in GNOME’s Mutter compositor last year that caused terminal text stutter on X11 sessions with NVIDIA GPUs – fixed by updates or by using Wayland. However, in our VMware case, the lag occurs even on updated GNOME and across X/Wayland, so the Mutter issue is likely not to blame.)
+---
 
-* **VMware Tools / Drivers**: Outdated **VMware Tools (open-vm-tools)** in the guest can sometimes cause performance anomalies. In early reports, some noted that rolling-release distros with newer open-vm-tools (v11.3.5+) didn’t exhibit the lag as much as those on older versions. This hinted that an update in VMware’s guest drivers might help. In practice, upgrading open-vm-tools alone was not a guaranteed fix (one user removed open-vm-tools and saw no improvement), but it’s wise to ensure you have the **latest open-vm-tools** package installed, as newer releases may contain performance fixes. Similarly, keep the guest’s graphics stack (e.g. Mesa `vmwgfx` driver) up to date via system updates. On the host side, ensure your GPU drivers (Intel/AMD/NVIDIA) are current as well, although host drivers have not been singled out as the root cause here (the issue occurs on multiple GPU brands).
+## 🔍 Cause
 
-In summary, the evidence points to a **VMware Workstation regression/bug** (introduced in 16.2 and persisting through 17.6.3) in how it virtualizes the graphics and input for Linux guests. Debian/Ubuntu-based guests under VMware seem particularly affected. The lag is essentially a VMware compatibility problem – likely a timing issue with the virtual SVGA device’s rendering or the virtual keyboard input interrupts (or a combination thereof) when 3D acceleration is enabled.
+This appears to be a **long-standing VMware bug** introduced in Workstation **16.2** and persisting in 17.x:
 
-## Solutions and Workarounds
+* **3D acceleration timing issue** causes display updates to stall until another event forces a refresh.
+* **Virtual keyboard (PS/2) interrupt lag** contributes to slow input.
+* Observed with **GNOME, KDE, X11, Wayland**, even pure TTY — so not DE-specific.
+* Not resolved by simply updating guest tools — it’s at the hypervisor graphics/input level.
 
-Thankfully, users and VMware engineers have identified several workarounds and fixes. You may need to apply more than one to fully eliminate the terminal lag. Here are the recommended approaches:
+---
 
-* **1. Disable Accelerated 3D Graphics (Temporary Fix):** The simplest remedy is to **turn off 3D acceleration** for the VM’s display. In VMware Workstation, shut down the VM and go to **VM Settings > Hardware > Display**, then **uncheck “Accelerate 3D graphics.”** After booting the VM with 3D disabled, users report the typing lag disappears. This is a quick fix to restore usability. However, note that without 3D support, you lose hardware graphics acceleration in the guest (affecting 3D apps, smooth window rendering, etc.). If your workflow is mostly terminal-based, this may be acceptable. On the other hand, if you need 3D (for desktop effects or GPU computing), consider the alternative fixes below. *(On some Workstation versions, especially on Windows hosts, you should also disable the global **“Allow hardware acceleration for all consoles”** option if simply unchecking per-VM 3D causes a crash. This appears to be a specific bug in 17.6.0 that produced an *svga* module crash when a VM was run with 3D off but console acceleration on.)*
+## ✅ Solutions & Workarounds
 
-* **2. Switch Guest Display Server (Wayland ↔ X11):** If your Ubuntu guest is running the **GNOME desktop on Wayland (the default for newer Ubuntu releases)**, try switching to an **X11 session**, or vice versa. You can choose this at the login screen (gear icon) or disable Wayland in `/etc/gdm3/custom.conf`. While the VMware-induced lag isn’t strictly tied to Wayland or X11 (it has occurred on both), changing the session can avoid any edge-case interactions with the desktop compositor. For example, the prior Mutter bug caused stuttering on X11 but not on Wayland. Conversely, some VMware users on Fedora found performance improved under X11 in certain scenarios. In our context, this switch is more of a **troubleshooting step** – don’t expect it to solve the VMware bug universally, but it can rule out display-server-specific rendering issues. If you notice the lag only on one and not the other, stick with the smoother option. (Also, as a broader tip: if using a heavy desktop like GNOME or KDE, testing a lighter environment like **XFCE or MATE** under X11 can sometimes reduce graphical overhead. A lightweight DE might not trigger the VMware bug as severely, and at the very least will improve general VM responsiveness.)
+### 1. **Disable 3D Acceleration** (Quick Fix)
 
-* **3. Update VMware Tools and Guest Drivers:** Make sure your VM has the latest **open-vm-tools** package *and* the companion **open-vm-tools-desktop** (for GUI integration) if using an Ubuntu Desktop guest. On Ubuntu, you can update these via `sudo apt update && sudo apt install --reinstall open-vm-tools open-vm-tools-desktop`. Newer versions contain bug fixes – for instance, it was speculated that open-vm-tools 11.3.5 or newer might mitigate the input lag issue on some distros. Likewise, ensure the guest is fully updated (kernel, Mesa, etc.), as performance bugs in the virtual GPU driver might have been addressed in Linux updates. While updating tools/drivers alone may not cure the lag in every case, it lays a proper foundation for the other fixes to work optimally. (If you previously installed VMware’s proprietary Tools, consider switching to open-vm-tools, or vice-versa, to test if one performs better.)
+* Shut down your VM.
+* Go to **VM Settings > Display**.
+* Uncheck **“Accelerate 3D Graphics”**.
+* Start VM. Terminal lag should disappear.
 
-* **4. Use VMware Keyboard Optimization (Virtual USB Keyboard):** A more targeted fix from VMware is to **change the virtual keyboard interface** to USB. This can be done in two ways:
+🔗 [Forum report confirming fix](https://communities.vmware.com/t5/VMware-Workstation-Pro/Noticeable-typing-lag-in-Linux-VM-terminals-since-v16-2/td-p/2889254)
 
-  * **Via .vmx Config:** Power off the VM and open its `.vmx` file in a text editor. Add the following lines, then save and start the VM:
+---
 
-    ```
-    keyboard.vusb.enable = "TRUE"  
-    keyboard.allowBothIRQs = "FALSE" 
-    ```
+### 2. **Switch to X11 or Wayland**
 
-    These settings force the guest to use a **virtual USB HID keyboard** (and disable dual-IRQ handling for PS/2) instead of the default PS/2 device. After adding this, users have reported *dramatic improvements* – the keystroke lag disappears even with 3D acceleration on. In one confirmation, this “magic sauce” was applied to multiple Ubuntu and Mint VMs on different hosts, allowing re-enabling of 3D with no lag thereafter. Another user noted that setting `keyboard.vusb.enable = "TRUE"` alone solved it in their case. (This workaround addresses what appears to be an interrupt timing issue – by using the USB interface, keyboard events are handled more predictably, eliminating the weird input/render delays.)
+If you're on **Wayland**, try X11:
 
-  * **Via VMware UI (“Optimize for Games”):** If you prefer not to manually edit the VMX, VMware Workstation’s UI offers a similar tweak. Go to **VM Settings > Options > Advanced > Keyboard** and set **“Optimize for games” = Always**. This setting ensures keyboard and mouse input is eagerly grabbed and delivered to the VM with minimal latency, which can help with the lag. Essentially, it’s another way of prioritizing VM input handling (though the `.vmx` method is more direct in switching to USB mode). After enabling this, restart the VM and test the terminal responsiveness.
+* Log out > click gear icon > select **Ubuntu on Xorg** > log back in.
 
-* **5. Tweak Guest Terminal/Software Settings:** The lag we’re discussing is largely due to VMware’s virtualization, but if you primarily notice it in a specific application (like `tmux` or a particular terminal emulator), a few minor tweaks might alleviate the perception of lag. For example, with tmux you can reduce the default **escape-time** delay. In `~/.tmux.conf` add: `set-option -sg escape-time 0` to make tmux respond immediately to key sequences. This won’t fix the underlying refresh issue, but it can eliminate additional delays that stack on top of VMware’s problem. Similarly, in GNOME Terminal you could disable certain rendering features or try a simpler terminal app (like xterm or LXTerminal) to see if it updates any faster. Disabling **desktop visual effects** (animations) in Ubuntu’s Settings can also remove some GPU overhead, making any UI slowness less pronounced. These are more “quality of life” tweaks – they won’t solve the root cause, but can make the terminal feel snappier.
+Or disable Wayland completely:
 
-* **6. Monitor VMware Updates and Community Forums:** VMware is aware of this issue – it has been extensively discussed in their forums and communities. It’s a long-standing problem (over 2 years) that only recently got a concrete workaround. Keep an eye on VMware Workstation release notes to see if a permanent fix is included in a future update. (For instance, check the **Broadcom/VMware community thread** on “Noticeable typing lag in Linux VM terminals since v16.2” – there are over 100 posts dissecting the bug and confirming fixes like the USB keyboard trick. VMware support’s suggestion was exactly the .vmx tweak above.) If an official patch comes out, updating Workstation to that version would be ideal. In the meantime, those community solutions are your best bet. We also recommend reading VMware’s documentation on 3D acceleration and Linux guest best practices, and any relevant VMware KB articles (e.g. on input lag or graphics issues) if available.
+```bash
+sudo nano /etc/gdm3/custom.conf
+# Uncomment:
+WaylandEnable=false
+```
 
-* **7. Last Resorts:** If none of the above fully resolves the lag, you have a couple of fallback options. One is to **continue running with 3D acceleration off** (if your VM usage permits) – it’s not ideal but will keep the terminal usable. Another is to consider using a different hypervisor for your Ubuntu VM (VirtualBox or KVM, for example) if VMware Workstation simply won’t cooperate. However, given that there are workable fixes now (disabling 3D or using the keyboard tweak), you shouldn’t need to abandon VMware. Some users even resorted to scripting a tiny always-on-top `glxgears` window to force constant redraws as a hacky workaround – though this **shouldn’t be necessary** if you apply the solutions above. Finally, a few users chose to **downgrade VMware Workstation to 16.1.x** where the issue did not exist. This is only viable if you have access to the older installer and don’t need features from newer versions, but it did immediately fix the lag for those who tried it.
+Reboot and verify session.
 
-## Conclusion
+---
 
-The terminal lag in an Ubuntu VM under VMware Workstation 17 is primarily due to a VMware virtualization quirk (likely a 3D acceleration and input event handling bug) rather than a flaw in Ubuntu itself. Compatibility issues between VMware’s SVGA II graphics adapter, the guest’s rendering path, and how input interrupts are handled were causing the guest’s display to update sluggishly. By applying the workarounds above – from toggling 3D acceleration or switching display backends, to editing VMware settings for keyboard handling – you can **greatly improve or completely fix the responsiveness**. In particular, the VMware configuration tweak to use a USB virtual keyboard has proven to **eliminate the typing lag** for many users while still allowing 3D acceleration.
+### 3. **Use USB Virtual Keyboard (Highly Effective)**
 
-Until VMware releases an official fix, these adjustments serve as effective solutions. Be sure to reference the experiences of others (see the links to VMware community threads, AskUbuntu posts, and bug reports provided) as you troubleshoot. With the right combination of settings, your Ubuntu VM’s terminal should feel as snappy as expected, even with 3D acceleration turned on. Good luck, and happy coding in your VM!
+**Edit the VMX file** (while VM is off):
 
-**Sources:**
+```ini
+keyboard.vusb.enable = "TRUE"
+keyboard.allowBothIRQs = "FALSE"
+```
 
-* VMware Community Thread – *“Noticeable typing lag in Linux VM terminals since v16.2…”* (various user reports and VMware staff replies)
-* AskUbuntu Q\&A – *“Terminal/tmux slow on Ubuntu 22.04 in VMware”* (user description and solution to disable 3D with console acceleration off)
-* AllThingsHow Tech Guide – *“Fix Terminal/tmux Slow Performance on Ubuntu 22.04 in VMware”* (step-by-step workarounds)
-* Additional community insights on VMware Tools and Wayland vs X11 considerations (Mutter bug context) and user observations of the lag behavior.
+Alternatively, in VMware UI:
+
+* Go to **VM Settings > Options > Advanced**.
+* Set **"Optimize for games" = Always**.
+
+✅ This **fixes the lag** while still keeping 3D acceleration enabled.
+
+🔗 [VMware community fix](https://communities.vmware.com/t5/VMware-Workstation-Pro/Noticeable-typing-lag-in-Linux-VM-terminals-since-v16-2/td-p/2889254/page/5#comment-3682669)
+
+---
+
+### 4. **Update Guest Tools & Drivers**
+
+Run this in your Ubuntu guest:
+
+```bash
+sudo apt update
+sudo apt install --reinstall open-vm-tools open-vm-tools-desktop
+```
+
+Also keep **Mesa**, **kernel**, and **graphics stack** updated.
+
+---
+
+### 5. **Reduce Terminal App Latency**
+
+In `~/.tmux.conf`:
+
+```tmux
+set -sg escape-time 0
+```
+
+Try lightweight terminals like:
+
+* `xterm`
+* `lxterminal`
+* `kitty`
+
+Turn off terminal effects in GNOME settings.
+
+---
+
+### 6. **Monitor Official Fixes**
+
+This is a known bug that VMware has acknowledged.
+
+🔗 [VMware community master thread](https://communities.vmware.com/t5/VMware-Workstation-Pro/Noticeable-typing-lag-in-Linux-VM-terminals-since-v16-2/td-p/2889254)
+
+Stay up to date on new releases of VMware Workstation and **check release notes**.
+
+---
+
+### 7. **Extreme Measures (Not Recommended unless necessary)**
+
+* Downgrade to **VMware Workstation 16.1.x** – no lag reported.
+* Use **VirtualBox** or **KVM** instead.
+* Keep `glxgears` running to force screen refresh (hacky but works):
+
+```bash
+glxgears &
+```
+
+---
+
+## 🧠 Summary
+
+| Setting                   | Fixes Lag | Keeps 3D |
+| ------------------------- | --------- | -------- |
+| Disable 3D Acceleration   | ✅         | ❌        |
+| Use Virtual USB Keyboard  | ✅         | ✅        |
+| Switch Wayland/X11        | Sometimes | ✅        |
+| Lightweight DE / Terminal | Sometimes | ✅        |
+| VMware Tools Update       | Helps     | ✅        |
+
+---
+
+## 🔗 References
+
+* VMware Forum Thread: [Noticeable typing lag in Linux VM terminals since v16.2](https://communities.vmware.com/t5/VMware-Workstation-Pro/Noticeable-typing-lag-in-Linux-VM-terminals-since-v16-2/td-p/2889254)
+* Reddit: [Ubuntu terminal lag fix using VMX edits](https://www.reddit.com/r/VMware/comments/xu5mbx/comment/iqyo7zm/?utm_source=share&utm_medium=web2x&context=3)
+* AskUbuntu: [Terminal/tmux slow on Ubuntu 22.04 in VMware](https://askubuntu.com/questions/1412167/terminal-tmux-slow-on-ubuntu-22-04-in-vmware)
+* AllThingsHow: [Fix Terminal Lag in VMware Ubuntu Guest](https://allthings.how/fix-terminal-or-tmux-slow-performance-on-ubuntu-22-04-in-vmware/)
+* Ubuntu bug reference (old Mutter issue): [Launchpad bug #1953080](https://bugs.launchpad.net/ubuntu/+source/mutter/+bug/1953080)
+
+---
