@@ -12,7 +12,7 @@ set -e
 #sudo vmware-installer -u vmware-workstation
 
 # Define variables
-VMWARE_INSTALLER="/media/mdelgert/06e553b3-c8d2-475e-b98f-245551938440/downloads/VMware-Workstation-Full-17.6.3-24583834.x86_64.bundle"
+VMWARE_INSTALLER="/mnt/d1/downloads/VMware-Workstation-Full-17.6.3-24583834.x86_64.bundle"
 #VMWARE_INSTALLER="/media/mdelgert/06e553b3-c8d2-475e-b98f-245551938440/downloads/VMware-Workstation-Full-17.6.0-24238078.x86_64.bundle"
 
 LOG_FILE="$HOME/vmware-installation.log"
