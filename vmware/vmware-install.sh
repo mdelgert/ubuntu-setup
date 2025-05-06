@@ -3,6 +3,7 @@
 # Script to install VMware Workstation on Ubuntu
 # Runs as regular user, escalating to sudo only for privileged operations
 # https://phoenixnap.com/kb/install-vmware-workstation-ubuntu
+# https://knowledge.broadcom.com/external/article/315653/supported-host-operating-systems-for-wor.html
 
 # Exit on any error
 set -e
@@ -12,7 +13,7 @@ set -e
 
 # Define variables
 #VMWARE_INSTALLER="/media/mdelgert/Ventoy/Apps/VMware-Workstation-Full-17.6.3-24583834.x86_64.bundle"
-VMWARE_INSTALLER="/home/mdelgert/Downloads/VMware-Workstation-Full-17.6.1-24319023.x86_64.bundle"
+VMWARE_INSTALLER="/home/mdelgert/Downloads/VMware-Workstation-Full-17.5.2-23775571.x86_64.bundle"
 LOG_FILE="$HOME/vmware-installation.log"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 REQUIRED_PACKAGES=("gcc-12" "libgcc-12-dev" "build-essential")
