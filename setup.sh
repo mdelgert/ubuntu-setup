@@ -6,8 +6,7 @@ bash ./keys.sh
 bash ./apt.sh
 bash ./git.sh
 bash ./snap.sh
-cd veeam
-bash ./veeam.sh
-cd ..
-
-#bash ./docker.sh
+# cd veeam
+# bash ./veeam.sh
+# cd ..
+# bash ./docker.sh
