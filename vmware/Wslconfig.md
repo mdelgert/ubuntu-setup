@@ -14,7 +14,7 @@ nestedVirtualization=false
 In PowerShell, run the following command:
 
 ```powershell
-Set-Content -Path "$env:USERPROFILE\.wslconfig" -Value "[wsl2]`nNestedVirtualization=false"
+Set-Content -Path "$env:USERPROFILE\.wslconfig" -Value "[wsl2]`nnestedVirtualization=false"
 ```
 
 In Command Prompt, run the following command:
