@@ -4,6 +4,7 @@
 # Runs as regular user, escalating to sudo only for privileged operations
 # https://phoenixnap.com/kb/install-vmware-workstation-ubuntu
 # https://knowledge.broadcom.com/external/article/315653/supported-host-operating-systems-for-wor.html
+# https://www.linuxtechi.com/install-vmware-workstation-on-ubuntu/
 
 # Exit on any error
 set -e
