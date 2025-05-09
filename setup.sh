@@ -6,6 +6,7 @@ bash ./keys.sh
 bash ./apt.sh
 bash ./git.sh
 bash ./snap.sh
+bash ./lid.sh
 # cd veeam
 # bash ./veeam.sh
 # cd ..
