@@ -2,6 +2,7 @@
 
 # Script to set up KVM and virt-manager on Ubuntu 24.04.2 LTS
 # Runs as regular user, escalating to sudo only for privileged operations
+# https://www.dzombak.com/blog/2024/02/setting-up-kvm-virtual-machines-using-a-bridged-network/
 
 # Exit on any error
 set -e
