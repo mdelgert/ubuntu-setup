@@ -7,4 +7,4 @@
 # Install snap packages (search sudo snap find <package> for more)
 sudo snap install \
     bing-wall \
-    kdiskmark \
+    # kdiskmark \
