@@ -3,7 +3,7 @@
 # This script will copy keys to the .ssh directory and set the correct permissions
 
 # Define the source directory for keys
-KEYS_SOURCE_DIR="/media/mdelgert/06e553b3-c8d2-475e-b98f-245551938440/downloads/ssh"
+KEYS_SOURCE_DIR="/media/mdelgert/c550ebdb-185a-4c0d-9aed-88a1584af361/ssh"
 
 # Check if the .ssh directory exists
 if [ ! -d "$HOME/.ssh" ]; then

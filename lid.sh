@@ -18,6 +18,6 @@ echo "HandleLidSwitchExternalPower=ignore" | sudo tee -a "$CONFIG_FILE"
 echo "HandleLidSwitchDocked=ignore" | sudo tee -a "$CONFIG_FILE"
 
 # Restart the logind service to apply changes
-sudo systemctl restart systemd-logind
+# sudo systemctl restart systemd-logind
 
 echo "Lid switch settings updated and logind service restarted."
