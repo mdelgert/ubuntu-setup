@@ -7,7 +7,7 @@ bash ./apt.sh
 bash ./git.sh
 bash ./snap.sh
 bash ./lid.sh
-cd veeam
-bash ./veeam.sh
+# cd veeam
+# bash ./veeam.sh
 # cd ..
 # bash ./docker.sh
