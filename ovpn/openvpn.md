@@ -3,6 +3,16 @@
 sudo apt update
 sudo apt install openvpn-systemd-resolved
 
+# Find VPN and all connections config file paths useful
+sudo nmcli -f NAME,DEVICE,FILENAME connection show
+
+# Can manually add fix or just run this command
+sudo nmcli connection modify "OpenVPN" ipv4.dns-search ~local
+
+# Will need to also apply DnsFix in wireguard folder
+
+# This is for manual config and I could never get working
+
 # DNS support begin "sudo apt install openvpn-systemd-resolved"
 script-security 2
 up /etc/openvpn/update-systemd-resolved
