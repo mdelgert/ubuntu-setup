@@ -1,5 +1,16 @@
 # OpenVPN DNS Troubleshooting and Persistent Configuration
 
+sudo apt update
+sudo apt install openvpn-systemd-resolved
+
+# DNS support begin "sudo apt install openvpn-systemd-resolved"
+script-security 2
+up /etc/openvpn/update-systemd-resolved
+down /etc/openvpn/update-systemd-resolved
+down-pre
+dhcp-option DOMAIN-SEARCH local
+# DNS support end
+
 ## Useful Links
 - [openvpn-update-resolv-conf (GitHub)](https://github.com/alfredopalhares/openvpn-update-resolv-conf)
 - [OpenVPN Forums: DNS Issues](https://forums.openvpn.net/viewtopic.php?t=22159)
