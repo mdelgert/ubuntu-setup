@@ -55,7 +55,7 @@
 
    ```bash
    sudo apt update
-   sudo apt install wireguard
+   sudo apt install wireguard openresolv
    ```
 
 2. **Place Configuration File**:

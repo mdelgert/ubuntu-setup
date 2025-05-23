@@ -1,4 +1,5 @@
-
+https://github.com/alfredopalhares/openvpn-update-resolv-conf
+https://github.com/jonathanio/update-systemd-resolved
 ---
 
 ### ✅ DNS is Working Internally:
