@@ -50,7 +50,6 @@ Edit:
 
 ```bash
 sudo nano /etc/nsswitch.conf
-```
 
 Change this line:
 
