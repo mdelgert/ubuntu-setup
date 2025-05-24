@@ -6,8 +6,9 @@
 LOG_FILE="/var/log/nsswitch_script.log"
 NSSWITCH_FILE="/etc/nsswitch.conf"
 SOURCE_FILE="/etc/nsswitch.d/nsswitch_down.conf"
-BACKUP_FILE="/etc/nsswitch.d/backup/nsswitch.conf.bak.$(date +%Y%m%d_%H%M%S)"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+CREATE_BACKUP=false
+BACKUP_FILE="/etc/nsswitch.d/backup/nsswitch.conf.bak.$(date +%Y%m%d_%H%M%S)"
 
 # Function to log messages
 log_message() {
@@ -44,12 +45,14 @@ if [[ ! -f "$NSSWITCH_FILE" ]]; then
     exit 1
 fi
 
-# Create backup
-log_message "INFO" "Creating backup at $BACKUP_FILE"
-cp "$NSSWITCH_FILE" "$BACKUP_FILE"
-if [[ $? -ne 0 ]]; then
-    log_message "ERROR" "Failed to create backup at $BACKUP_FILE."
-    exit 1
+# Create backup if enabled
+if [[ "$CREATE_BACKUP" == "true" ]]; then
+    log_message "INFO" "Creating backup at $BACKUP_FILE"
+    cp "$NSSWITCH_FILE" "$BACKUP_FILE"
+    if [[ $? -ne 0 ]]; then
+        log_message "ERROR" "Failed to create backup at $BACKUP_FILE."
+        exit 1
+    fi
 fi
 
 # Copy source file to target
