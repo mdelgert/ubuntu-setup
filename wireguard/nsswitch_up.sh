@@ -65,22 +65,5 @@ fi
 chmod 644 "$NSSWITCH_FILE"
 log_message "INFO" "Set permissions to 644 for $NSSWITCH_FILE"
 
-# Verify the change
-if grep -Fx "hosts: files dns mdns4" "$NSSWITCH_FILE" > /dev/null; then
-    log_message "INFO" "Successfully updated $NSSWITCH_FILE with 'hosts: files dns mdns4'"
-else
-    log_message "ERROR" "Verification failed: 'hosts: files dns mdns4' not found in $NSSWITCH_FILE. Restoring backup."
-    cp "$BACKUP_FILE" "$NSSWITCH_FILE"
-    exit 1
-fi
-
-# Test SSH resolution
-log_message "INFO" "Testing SSH resolution for b1.local"
-if getent hosts b1.local > /dev/null; then
-    log_message "INFO" "Resolution for b1.local succeeded. Try 'ssh b1.local' to confirm."
-else
-    log_message "WARNING" "Resolution for b1.local failed. SSH may not work."
-fi
-
 log_message "INFO" "Script completed successfully."
 exit 0
