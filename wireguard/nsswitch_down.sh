@@ -2,6 +2,10 @@
 
 # Script to copy nsswitch_down.conf to /etc/nsswitch.conf with logging
 
+# Enable script execution
+ENABLE_SCRIPT=true
+ENABLE_BACKUP=false
+
 # Define paths and log file
 LOG_FILE="/var/log/nsswitch_script.log"
 NSSWITCH_FILE="/etc/nsswitch.conf"
@@ -45,8 +49,14 @@ if [[ ! -f "$NSSWITCH_FILE" ]]; then
     exit 1
 fi
 
+# Check if script is enabled
+if [[ "$ENABLE_SCRIPT" != "true" ]]; then
+    echo "Script is disabled by ENABLE_SCRIPT flag. Exiting."
+    exit 0
+fi
+
 # Create backup if enabled
-if [[ "$CREATE_BACKUP" == "true" ]]; then
+if [[ "$ENABLE_BACKUP" == "true" ]]; then
     log_message "INFO" "Creating backup at $BACKUP_FILE"
     cp "$NSSWITCH_FILE" "$BACKUP_FILE"
     if [[ $? -ne 0 ]]; then

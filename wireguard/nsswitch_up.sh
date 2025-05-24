@@ -2,12 +2,15 @@
 
 # Script to copy nsswitch_up.conf to /etc/nsswitch.conf with logging
 
+# Enable script execution
+ENABLE_SCRIPT=true
+ENABLE_BACKUP=false
+
 # Define paths and log file
 LOG_FILE="/var/log/nsswitch_script.log"
 NSSWITCH_FILE="/etc/nsswitch.conf"
 SOURCE_FILE="/etc/nsswitch.d/nsswitch_up.conf"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-CREATE_BACKUP=false
 BACKUP_FILE="/etc/nsswitch.d/backup/nsswitch.conf.bak.$(date +%Y%m%d_%H%M%S)"
 
 # Function to log messages
@@ -21,6 +24,12 @@ log_message() {
 if [[ $EUID -ne 0 ]]; then
     log_message "ERROR" "This script must be run as root (use sudo)."
     exit 1
+fi
+
+# Check if script is enabled
+if [[ "$ENABLE_SCRIPT" != "true" ]]; then
+    echo "Script is disabled by ENABLE_SCRIPT flag. Exiting."
+    exit 0
 fi
 
 # Initialize log file if it doesn't exist
@@ -46,7 +55,7 @@ if [[ ! -f "$NSSWITCH_FILE" ]]; then
 fi
 
 # Create backup if enabled
-if [[ "$CREATE_BACKUP" == "true" ]]; then
+if [[ "$ENABLE_BACKUP" == "true" ]]; then
     log_message "INFO" "Creating backup at $BACKUP_FILE"
     cp "$NSSWITCH_FILE" "$BACKUP_FILE"
     if [[ $? -ne 0 ]]; then
