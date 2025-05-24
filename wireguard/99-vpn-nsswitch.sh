@@ -5,7 +5,7 @@
 
 INTERFACE="$1"
 ACTION="$2"
-CONNECTION_NAME="WireGuard" # Exact connection name use "nmcli connection show" output
+CONNECTION_NAME="WireGuard"  # Exact VPN connection name
 UP_SCRIPT="/etc/nsswitch.d/nsswitch_up.sh"
 DOWN_SCRIPT="/etc/nsswitch.d/nsswitch_down.sh"
 LOG_FILE="/var/log/nsswitch_script.log"
@@ -29,9 +29,20 @@ fi
 
 # Get connection details for the interface
 if [[ -n "$INTERFACE" ]]; then
+    # Try active connections first
     CONNECTION=$(nmcli -t -f NAME,DEVICE connection show --active | grep ":$INTERFACE$" | cut -d: -f1)
     CONNECTION_UUID=$(nmcli -t -f UUID,DEVICE connection show --active | grep ":$INTERFACE$" | cut -d: -f1)
-    log_message "DEBUG" "Found CONNECTION=$CONNECTION, UUID=$CONNECTION_UUID for INTERFACE=$INTERFACE"
+    log_message "DEBUG" "Active connections: $(nmcli -t -f NAME,DEVICE,UUID connection show --active)"
+    log_message "DEBUG" "Found CONNECTION=$CONNECTION, UUID=$CONNECTION_UUID for INTERFACE=$INTERFACE (active)"
+
+    # If no active connection found (e.g., during down), try all connections with delay
+    if [[ -z "$CONNECTION" ]] && [[ "$ACTION" == "down" ]]; then
+        sleep 1  # Delay to allow NetworkManager to update
+        CONNECTION=$(nmcli -t -f NAME,connection.interface-name connection show | grep ":$INTERFACE$" | cut -d: -f1)
+        CONNECTION_UUID=$(nmcli -t -f UUID,connection.interface-name connection show | grep ":$INTERFACE$" | cut -d: -f1)
+        log_message "DEBUG" "All connections after delay: $(nmcli -t -f NAME,connection.interface-name,UUID connection show)"
+        log_message "DEBUG" "Found CONNECTION=$CONNECTION, UUID=$CONNECTION_UUID for INTERFACE=$INTERFACE (all)"
+    fi
 else
     log_message "ERROR" "No INTERFACE provided"
     exit 1
@@ -45,6 +56,8 @@ if [[ "$CONNECTION" != "$CONNECTION_NAME" ]]; then
         if [[ "$CONN_NAME_BY_UUID" == "$CONNECTION_NAME" ]]; then
             CONNECTION="$CONNECTION_NAME"
             log_message "DEBUG" "Matched $CONNECTION_NAME via UUID=$CONNECTION_UUID"
+        else
+            log_message "DEBUG" "UUID $CONNECTION_UUID does not match $CONNECTION_NAME (found $CONN_NAME_BY_UUID)"
         fi
     fi
 fi
