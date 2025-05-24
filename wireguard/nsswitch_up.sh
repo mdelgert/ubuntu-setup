@@ -3,9 +3,9 @@
 # Script to copy nsswitch_up.conf to /etc/nsswitch.conf with logging
 
 # Define paths and log file
+LOG_FILE="/var/log/nsswitch_script.log"
 NSSWITCH_FILE="/etc/nsswitch.conf"
 SOURCE_FILE="/etc/nsswitch.d/nsswitch_up.conf"
-LOG_FILE="/etc/nsswitch.d/nsswitch_script.log"
 BACKUP_FILE="/etc/nsswitch.d/backup/nsswitch.conf.bak.$(date +%Y%m%d_%H%M%S)"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
