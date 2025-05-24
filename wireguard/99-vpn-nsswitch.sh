@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # NetworkManager dispatcher script to run nsswitch scripts for WireGuard VPN
-# Runs nsswitch_up.sh when VPN is up, nsswitch_down.sh when VPN is down
+# Runs nsswitch_up.sh when wg0 is up, nsswitch_down.sh when wg0 is down
 
 INTERFACE="$1"
 ACTION="$2"
-CONNECTION_NAME="WireGuard"  # Exact VPN connection name
+EXPECTED_INTERFACE="wg0"  # WireGuard interface name
 UP_SCRIPT="/etc/nsswitch.d/nsswitch_up.sh"
 DOWN_SCRIPT="/etc/nsswitch.d/nsswitch_down.sh"
 LOG_FILE="/var/log/nsswitch_script.log"
@@ -21,49 +21,15 @@ log_message() {
 # Debug: Log all received parameters
 log_message "DEBUG" "Received: INTERFACE=$INTERFACE, ACTION=$ACTION"
 
-# Skip dns-change events
-if [[ "$ACTION" == "dns-change" ]]; then
-    log_message "INFO" "Skipping dns-change event for INTERFACE=$INTERFACE"
+# Skip if interface is not wg0
+if [[ "$INTERFACE" != "$EXPECTED_INTERFACE" ]]; then
+    log_message "INFO" "Interface $INTERFACE does not match $EXPECTED_INTERFACE. Skipping."
     exit 0
 fi
 
-# Get connection details for the interface
-if [[ -n "$INTERFACE" ]]; then
-    # Try active connections first
-    CONNECTION=$(nmcli -t -f NAME,DEVICE connection show --active | grep ":$INTERFACE$" | cut -d: -f1)
-    CONNECTION_UUID=$(nmcli -t -f UUID,DEVICE connection show --active | grep ":$INTERFACE$" | cut -d: -f1)
-    log_message "DEBUG" "Active connections: $(nmcli -t -f NAME,DEVICE,UUID connection show --active)"
-    log_message "DEBUG" "Found CONNECTION=$CONNECTION, UUID=$CONNECTION_UUID for INTERFACE=$INTERFACE (active)"
-
-    # If no active connection found (e.g., during down), try all connections with delay
-    if [[ -z "$CONNECTION" ]] && [[ "$ACTION" == "down" ]]; then
-        sleep 1  # Delay to allow NetworkManager to update
-        CONNECTION=$(nmcli -t -f NAME,connection.interface-name connection show | grep ":$INTERFACE$" | cut -d: -f1)
-        CONNECTION_UUID=$(nmcli -t -f UUID,connection.interface-name connection show | grep ":$INTERFACE$" | cut -d: -f1)
-        log_message "DEBUG" "All connections after delay: $(nmcli -t -f NAME,connection.interface-name,UUID connection show)"
-        log_message "DEBUG" "Found CONNECTION=$CONNECTION, UUID=$CONNECTION_UUID for INTERFACE=$INTERFACE (all)"
-    fi
-else
-    log_message "ERROR" "No INTERFACE provided"
-    exit 1
-fi
-
-# Check if connection matches WireGuard
-if [[ "$CONNECTION" != "$CONNECTION_NAME" ]]; then
-    # Try matching by UUID
-    if [[ -n "$CONNECTION_UUID" ]]; then
-        CONN_NAME_BY_UUID=$(nmcli -t -f NAME,UUID connection show | grep ":$CONNECTION_UUID$" | cut -d: -f1)
-        if [[ "$CONN_NAME_BY_UUID" == "$CONNECTION_NAME" ]]; then
-            CONNECTION="$CONNECTION_NAME"
-            log_message "DEBUG" "Matched $CONNECTION_NAME via UUID=$CONNECTION_UUID"
-        else
-            log_message "DEBUG" "UUID $CONNECTION_UUID does not match $CONNECTION_NAME (found $CONN_NAME_BY_UUID)"
-        fi
-    fi
-fi
-
-if [[ "$CONNECTION" != "$CONNECTION_NAME" ]]; then
-    log_message "INFO" "Connection $CONNECTION (INTERFACE=$INTERFACE, ACTION=$ACTION) does not match $CONNECTION_NAME. Skipping."
+# Skip dns-change events
+if [[ "$ACTION" == "dns-change" ]]; then
+    log_message "INFO" "Skipping dns-change event for INTERFACE=$INTERFACE"
     exit 0
 fi
 
@@ -71,7 +37,7 @@ fi
 case "$ACTION" in
     up)
         if [[ -x "$UP_SCRIPT" ]]; then
-            log_message "INFO" "Running $UP_SCRIPT for $CONNECTION_NAME VPN up on $INTERFACE"
+            log_message "INFO" "Running $UP_SCRIPT for $EXPECTED_INTERFACE VPN up"
             sudo "$UP_SCRIPT"
             if [[ $? -eq 0 ]]; then
                 log_message "INFO" "$UP_SCRIPT executed successfully"
@@ -84,7 +50,7 @@ case "$ACTION" in
         ;;
     down)
         if [[ -x "$DOWN_SCRIPT" ]]; then
-            log_message "INFO" "Running $DOWN_SCRIPT for $CONNECTION_NAME VPN down on $INTERFACE"
+            log_message "INFO" "Running $DOWN_SCRIPT for $EXPECTED_INTERFACE VPN down"
             sudo "$DOWN_SCRIPT"
             if [[ $? -eq 0 ]]; then
                 log_message "INFO" "$DOWN_SCRIPT executed successfully"
@@ -96,7 +62,7 @@ case "$ACTION" in
         fi
         ;;
     *)
-        log_message "INFO" "Unhandled action $ACTION for $CONNECTION_NAME on $INTERFACE. Skipping."
+        log_message "INFO" "Unhandled action $ACTION for $EXPECTED_INTERFACE. Skipping."
         exit 0
         ;;
 esac
