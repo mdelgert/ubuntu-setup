@@ -1,5 +1,6 @@
 #!/bin/bash
-# Link: https://github.com/christgau/wsdd/issues/212
+# Links: https://github.com/christgau/wsdd/issues/212
+# https://github.com/christgau/wsdd
 
 set -e
 
