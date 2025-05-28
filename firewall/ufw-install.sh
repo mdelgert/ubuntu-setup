@@ -9,6 +9,9 @@ sudo apt install --reinstall ufw
 echo "Enabling UFW firewall..."
 sudo ufw enable
 
+# Show app profiles
+sudo ufw app list
+
 # # Allow SSH connections
 # echo "Allowing SSH connections through UFW..."
 # sudo ufw allow ssh
