@@ -1,10 +1,9 @@
 #!/bin/bash
-# Uninstalls Samba and WSDD, and removes related configuration and data
-
+# Uninstalls Samba
 set -euo pipefail
 
 # Purge Samba and WSDD packages
-sudo apt purge -y samba samba-common samba-common-bin wsdd wsdd-server
+sudo apt purge -y samba samba-common samba-common-bin
 sudo apt autoremove --purge -y
 
 # Remove Samba configuration and data directories
