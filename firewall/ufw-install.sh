@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # Enable UFW firewall
-sudo apt install ufw -y
+# sudo apt install ufw -y
+sudo apt install --reinstall ufw
 
 # Check if UFW is active
 echo "Enabling UFW firewall..."
