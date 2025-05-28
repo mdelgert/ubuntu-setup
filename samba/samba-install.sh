@@ -1,6 +1,6 @@
 #!/bin/bash
+# Link: https://github.com/christgau/wsdd/issues/212
 
-# Exit on any error
 set -e
 
 SAMBA_USER="mdelgert"
