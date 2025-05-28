@@ -1,0 +1,4 @@
+[RDP]
+title=Remote Desktop Protocol
+description=Allow inbound RDP connections (TCP/3389)
+ports=3389/tcp
