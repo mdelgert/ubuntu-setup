@@ -9,16 +9,16 @@ sudo apt install --reinstall ufw
 echo "Enabling UFW firewall..."
 sudo ufw enable
 
-# Allow SSH connections
-echo "Allowing SSH connections through UFW..."
-sudo ufw allow ssh
+# # Allow SSH connections
+# echo "Allowing SSH connections through UFW..."
+# sudo ufw allow ssh
 
-# Allow Samba connections
-echo "Allowing Samba connections through UFW..."
-sudo ufw allow samba
+# # Allow Samba connections
+# echo "Allowing Samba connections through UFW..."
+# sudo ufw allow samba
 
-# Allow rdp connections
-echo "Allowing RDP connections through UFW..."
-sudo ufw allow 3389/tcp
+# # Allow rdp connections
+# echo "Allowing RDP connections through UFW..."
+# sudo ufw allow 3389/tcp
 
 exit 0
