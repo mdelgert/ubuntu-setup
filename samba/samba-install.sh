@@ -13,5 +13,6 @@ sudo systemctl restart smbd
 sudo systemctl enable smbd
 sudo samba --version
 # sudo smbpasswd -a $SAMBA_USER
+./wsdd-install.sh
 
 exit 0

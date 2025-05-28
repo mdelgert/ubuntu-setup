@@ -4,9 +4,8 @@
 set -e
 
 sudo apt install wsdd-server -y
-sudo systemctl restart smbd
-sudo systemctl enable smbd
+sudo systemctl restart wsdd-server
+sudo systemctl enable wsdd-server
 sudo wsdd --version
-./wsdd-install.sh
 
 exit 0

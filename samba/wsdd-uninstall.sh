@@ -3,6 +3,5 @@
 set -e
 
 sudo apt purge wsdd wsdd-server -y
-./wssd-uninstall.sh
 
 exit 0
