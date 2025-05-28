@@ -19,7 +19,7 @@ sudo ufw allow ssh
 
 # Allow Samba connections
 echo "Allowing Samba connections through UFW..."
-sudo ufw allow 'Samba'
+sudo ufw allow samba
 
 # Allow rdp connections
 echo "Allowing RDP connections through UFW..."
