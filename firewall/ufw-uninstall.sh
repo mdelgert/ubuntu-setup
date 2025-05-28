@@ -9,10 +9,10 @@ else
     echo "UFW is not installed. Nothing to disable."
 fi
 
-# Remove UFW and gufw packages
+# Remove UFW packages
 if command -v apt &> /dev/null; then
-    echo "Removing UFW and gufw packages..."
-    sudo apt purge -y ufw gufw
+    echo "Removing UFW packages..."
+    sudo apt purge -y ufw
     sudo apt autoremove --purge -y
 else
     echo "apt command not found. Cannot remove UFW and gufw."

@@ -2,12 +2,7 @@
 set -euo pipefail
 
 # Enable UFW firewall
-if ! command -v ufw &> /dev/null; then
-    echo "UFW is not installed. Installing UFW and gufw..."
-    sudo apt install ufw gufw
-else
-    echo "UFW is already installed."
-fi
+sudo apt install ufw -y
 
 # Check if UFW is active
 echo "Enabling UFW firewall..."
