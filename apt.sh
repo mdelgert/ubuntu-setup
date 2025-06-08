@@ -9,3 +9,5 @@ sudo apt install -y \
     git \
     openssh-server \
     gparted \
+    gdebi \
+    gdebi-core
