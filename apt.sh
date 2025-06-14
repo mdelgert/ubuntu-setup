@@ -10,4 +10,6 @@ sudo apt install -y \
     openssh-server \
     gparted \
     gdebi \
-    gdebi-core
+    gdebi-core \
+    rpi-imager
+    
