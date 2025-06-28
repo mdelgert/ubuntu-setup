@@ -25,6 +25,7 @@ sudo iptables -A FORWARD -i wlp2s0 -o lxdbr0 -m state --state RELATED,ESTABLISHE
 
 # Delete existing broken bridge (if any)
 lxc profile device remove default eth0
+lxc profile device remove default wlp2s0
 lxc network delete lxdbr0
 
 # Recreate LXD NAT bridge
@@ -34,7 +35,16 @@ lxc network create lxdbr0 \
   ipv6.address=none
 
 # Ensure all containers use the default profile with this bridge
+# lxc network attach-profile lxdbr0 default wlp2s0
+
+<!-- 
 lxc profile device add default eth0 nic \
   nictype=bridged \
   parent=lxdbr0 \
-  name=eth0
+  name=eth0 
+-->
+
+lxc profile device add default wlp2s0 nic \
+  nictype=bridged \
+  parent=lxdbr0 \
+  name=wlp2s0
