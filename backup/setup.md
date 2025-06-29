@@ -1,6 +1,7 @@
 https://www.borgbase.com/
 https://github.com/borgbase
 https://restic.readthedocs.io/en/stable/040_backup.html
+https://restic.readthedocs.io/en/stable/040_backup.html#environment-variables
 
 ```bash
 sudo apt-get install restic
@@ -9,6 +10,10 @@ restic init
 restic backup my-folder
 restic snapshots
 ```
+
+Or to make permenant add to .bashrc
+export RESTIC_REPOSITORY=rest:https://yourkey.repo.borgbase.com
+export RESTIC_PASSWORD=password
 
 The most straightforward cloud backup solution for **Ubuntu** depends on your preference for:
 
